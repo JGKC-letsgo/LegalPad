@@ -3,7 +3,7 @@ import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wo
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ClerkProvider, SignIn, SignUp, Show, useClerk, useAuth } from "@clerk/react";
+import { ClerkProvider, SignIn, SignUp, useClerk, useAuth } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { shadcn } from "@clerk/themes";
 import NotFound from "@/pages/not-found";
@@ -116,29 +116,24 @@ function SignUpPage() {
 }
 
 function HomeRedirect() {
-  return (
-    <>
-      <Show when="signed-in">
-        <Redirect to="/matters" />
-      </Show>
-      <Show when="signed-out">
-        <LandingPage />
-      </Show>
-    </>
-  );
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) return null;
+  if (isSignedIn) return <Redirect to="/matters" />;
+  return <LandingPage />;
 }
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  return (
-    <>
-      <Show when="signed-in">
-        <Component />
-      </Show>
-      <Show when="signed-out">
-        <Redirect to="/" />
-      </Show>
-    </>
-  );
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) return null;
+  if (isSignedIn) return <Component />;
+  return <Redirect to="/" />;
+}
+
+function AuthGate() {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) return null;
+  if (isSignedIn) return <AppRoutes />;
+  return <Redirect to="/" />;
 }
 
 function AppRoutes() {
@@ -191,14 +186,7 @@ function ClerkProviderWithRoutes() {
           <Route path="/" component={HomeRedirect} />
           <Route path="/sign-in/*?" component={SignInPage} />
           <Route path="/sign-up/*?" component={SignUpPage} />
-          <Route path="/{*rest}">
-            <Show when="signed-in">
-              <AppRoutes />
-            </Show>
-            <Show when="signed-out">
-              <Redirect to="/" />
-            </Show>
-          </Route>
+          <Route path="/{*rest}" component={AuthGate} />
         </Switch>
       </QueryClientProvider>
     </ClerkProvider>
