@@ -1,22 +1,33 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Legal Matter Notes API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: matters
+    description: Legal matter operations
+  - name: issues
+    description: Issue operations within a matter
+  - name: analysis
+    description: Analysis operations for a matter
+  - name: recommendations
+    description: Recommendation operations for a matter
+  - name: caveats
+    description: Caveat operations for a matter
+  - name: dashboard
+    description: Dashboard summary operations
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +35,462 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /matters:
+    get:
+      operationId: listMatters
+      tags: [matters]
+      summary: List all matters
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: urgency
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of matters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Matter"
+    post:
+      operationId: createMatter
+      tags: [matters]
+      summary: Create a new matter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatterInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Matter"
+
+  /matters/{id}:
+    get:
+      operationId: getMatter
+      tags: [matters]
+      summary: Get a single matter with all sections
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Matter detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatterDetail"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateMatter
+      tags: [matters]
+      summary: Update a matter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatterUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Matter"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteMatter
+      tags: [matters]
+      summary: Delete a matter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /matters/{id}/issues:
+    get:
+      operationId: listIssues
+      tags: [issues]
+      summary: List issues for a matter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of issues
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Issue"
+    post:
+      operationId: createIssue
+      tags: [issues]
+      summary: Create an issue for a matter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Issue"
+
+  /matters/{matterId}/issues/{issueId}:
+    patch:
+      operationId: updateIssue
+      tags: [issues]
+      summary: Update an issue
+      parameters:
+        - name: matterId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: issueId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Issue"
+    delete:
+      operationId: deleteIssue
+      tags: [issues]
+      summary: Delete an issue
+      parameters:
+        - name: matterId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: issueId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /matters/{id}/analysis:
+    get:
+      operationId: getAnalysis
+      tags: [analysis]
+      summary: Get analysis for a matter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Analysis"
+    put:
+      operationId: upsertAnalysis
+      tags: [analysis]
+      summary: Create or update analysis for a matter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalysisInput"
+      responses:
+        "200":
+          description: Analysis saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Analysis"
+
+  /matters/{id}/recommendations:
+    get:
+      operationId: listRecommendations
+      tags: [recommendations]
+      summary: List recommendations for a matter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recommendation"
+    post:
+      operationId: createRecommendation
+      tags: [recommendations]
+      summary: Create a recommendation for a matter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecommendationInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recommendation"
+
+  /matters/{matterId}/recommendations/{recId}:
+    patch:
+      operationId: updateRecommendation
+      tags: [recommendations]
+      summary: Update a recommendation
+      parameters:
+        - name: matterId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecommendationUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recommendation"
+    delete:
+      operationId: deleteRecommendation
+      tags: [recommendations]
+      summary: Delete a recommendation
+      parameters:
+        - name: matterId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /matters/{id}/caveats:
+    get:
+      operationId: listCaveats
+      tags: [caveats]
+      summary: List caveats for a matter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of caveats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Caveat"
+    post:
+      operationId: createCaveat
+      tags: [caveats]
+      summary: Create a caveat for a matter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CaveatInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Caveat"
+
+  /matters/{matterId}/caveats/{caveatId}:
+    patch:
+      operationId: updateCaveat
+      tags: [caveats]
+      summary: Update a caveat
+      parameters:
+        - name: matterId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: caveatId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CaveatUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Caveat"
+    delete:
+      operationId: deleteCaveat
+      tags: [caveats]
+      summary: Delete a caveat
+      parameters:
+        - name: matterId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: caveatId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Summary stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /matters/recent:
+    get:
+      operationId: getRecentMatters
+      tags: [matters]
+      summary: Get recently updated matters
+      responses:
+        "200":
+          description: Recent matters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Matter"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +501,314 @@ components:
       required:
         - status
 
+    Matter:
+      type: object
+      required: [id, title, stakeholderName, stakeholderDepartment, urgency, category, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        stakeholderName:
+          type: string
+        stakeholderDepartment:
+          type: string
+        urgency:
+          type: string
+          enum: [low, medium, high, critical]
+        category:
+          type: string
+          enum: [contract, compliance, employment, intellectual_property, dispute, regulatory, data_privacy, corporate, general]
+        status:
+          type: string
+          enum: [intake, analysis, review, complete]
+        summary:
+          type: ["string", "null"]
+        dateReceived:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    MatterInput:
+      type: object
+      required: [title, stakeholderName, stakeholderDepartment, urgency, category]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        stakeholderName:
+          type: string
+          minLength: 1
+        stakeholderDepartment:
+          type: string
+          minLength: 1
+        urgency:
+          type: string
+          enum: [low, medium, high, critical]
+        category:
+          type: string
+          enum: [contract, compliance, employment, intellectual_property, dispute, regulatory, data_privacy, corporate, general]
+        summary:
+          type: string
+        dateReceived:
+          type: string
+
+    MatterUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        stakeholderName:
+          type: string
+        stakeholderDepartment:
+          type: string
+        urgency:
+          type: string
+          enum: [low, medium, high, critical]
+        category:
+          type: string
+          enum: [contract, compliance, employment, intellectual_property, dispute, regulatory, data_privacy, corporate, general]
+        status:
+          type: string
+          enum: [intake, analysis, review, complete]
+        summary:
+          type: string
+        dateReceived:
+          type: string
+
+    MatterDetail:
+      type: object
+      required: [matter, issues, analysis, recommendations, caveats]
+      properties:
+        matter:
+          $ref: "#/components/schemas/Matter"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/Issue"
+        analysis:
+          oneOf:
+            - $ref: "#/components/schemas/Analysis"
+            - type: "null"
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Recommendation"
+        caveats:
+          type: array
+          items:
+            $ref: "#/components/schemas/Caveat"
+
+    Issue:
+      type: object
+      required: [id, matterId, title, sortOrder, createdAt]
+      properties:
+        id:
+          type: integer
+        matterId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        legalBasis:
+          type: ["string", "null"]
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+
+    IssueInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        legalBasis:
+          type: string
+        sortOrder:
+          type: integer
+
+    IssueUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        legalBasis:
+          type: string
+        sortOrder:
+          type: integer
+
+    Analysis:
+      type: object
+      required: [id, matterId, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        matterId:
+          type: integer
+        background:
+          type: ["string", "null"]
+        legalFramework:
+          type: ["string", "null"]
+        criticalAnalysis:
+          type: ["string", "null"]
+        riskLevel:
+          type: ["string", "null"]
+          enum: [low, medium, high, critical, null]
+        riskNotes:
+          type: ["string", "null"]
+        selfAssessment:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    AnalysisInput:
+      type: object
+      properties:
+        background:
+          type: string
+        legalFramework:
+          type: string
+        criticalAnalysis:
+          type: string
+        riskLevel:
+          type: string
+          enum: [low, medium, high, critical]
+        riskNotes:
+          type: string
+        selfAssessment:
+          type: string
+
+    Recommendation:
+      type: object
+      required: [id, matterId, content, type, sortOrder, createdAt]
+      properties:
+        id:
+          type: integer
+        matterId:
+          type: integer
+        content:
+          type: string
+        type:
+          type: string
+          enum: [primary, alternative, conditional]
+        priority:
+          type: ["integer", "null"]
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+
+    RecommendationInput:
+      type: object
+      required: [content, type]
+      properties:
+        content:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [primary, alternative, conditional]
+        priority:
+          type: integer
+        sortOrder:
+          type: integer
+
+    RecommendationUpdate:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [primary, alternative, conditional]
+        priority:
+          type: integer
+        sortOrder:
+          type: integer
+
+    Caveat:
+      type: object
+      required: [id, matterId, content, sortOrder, createdAt]
+      properties:
+        id:
+          type: integer
+        matterId:
+          type: integer
+        content:
+          type: string
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+
+    CaveatInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+        sortOrder:
+          type: integer
+
+    CaveatUpdate:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+        sortOrder:
+          type: integer
+
+    DashboardSummary:
+      type: object
+      required: [totalMatters, byStatus, byUrgency, byCategory, openMatters]
+      properties:
+        totalMatters:
+          type: integer
+        byStatus:
+          type: array
+          items:
+            type: object
+            required: [status, count]
+            properties:
+              status:
+                type: string
+              count:
+                type: integer
+        byUrgency:
+          type: array
+          items:
+            type: object
+            required: [urgency, count]
+            properties:
+              urgency:
+                type: string
+              count:
+                type: integer
+        byCategory:
+          type: array
+          items:
+            type: object
+            required: [category, count]
+            properties:
+              category:
+                type: string
+              count:
+                type: integer
+        openMatters:
+          type: integer
