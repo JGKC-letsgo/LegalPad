@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "DkZk3KmG4z1tATDAQ570d"
+uri = "file://artifacts/legalpad-video/public/audio/bg_music.mp3"
+type = "audio"
+title = "background music"
