@@ -14,6 +14,7 @@ export const mattersTable = pgTable("matters", {
   dateReceived: text("date_received"),
   responseDue: text("response_due"),
   deadline: text("deadline"),
+  lastRemindedAt: timestamp("last_reminded_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
