@@ -17,7 +17,7 @@ After 16 years in-house across APAC, my matter list lived in some combination of
 
 ## Try it
 
-Live on Replit: https://replit.com/@jeangankc/LegalPad
+(https://legal-case-manager-jeangankc.replit.app/)
 
 ## Built with
 
