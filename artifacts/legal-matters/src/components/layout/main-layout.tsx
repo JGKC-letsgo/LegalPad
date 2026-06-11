@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Scale, Briefcase, FileText, LayoutDashboard, Plus, Settings } from "lucide-react";
+import { Landmark, Briefcase, FileText, LayoutDashboard, Plus, Settings } from "lucide-react";
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -16,7 +16,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside className="w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col hidden md:flex">
         <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
-          <Scale className="h-6 w-6 text-accent mr-3" />
+          <Landmark className="h-6 w-6 text-accent mr-3" />
           <span className="font-serif font-bold text-lg tracking-tight">Legalpad</span>
         </div>
         
@@ -54,7 +54,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 flex flex-col overflow-hidden relative">
         <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6 z-10">
           <div className="md:hidden flex items-center">
-            <Scale className="h-5 w-5 text-accent mr-2" />
+            <Landmark className="h-5 w-5 text-accent mr-2" />
             <span className="font-serif font-bold">Legalpad</span>
           </div>
           <div className="hidden md:flex flex-1"></div>
