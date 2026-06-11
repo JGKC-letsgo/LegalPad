@@ -17,7 +17,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       <aside className="w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col hidden md:flex">
         <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
           <Scale className="h-6 w-6 text-accent mr-3" />
-          <span className="font-serif font-bold text-lg tracking-tight">Chambers</span>
+          <span className="font-serif font-bold text-lg tracking-tight">Legalpad</span>
         </div>
         
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
@@ -55,7 +55,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6 z-10">
           <div className="md:hidden flex items-center">
             <Scale className="h-5 w-5 text-accent mr-2" />
-            <span className="font-serif font-bold">Chambers</span>
+            <span className="font-serif font-bold">Legalpad</span>
           </div>
           <div className="hidden md:flex flex-1"></div>
           <div className="flex items-center space-x-4">
