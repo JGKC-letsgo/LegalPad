@@ -491,6 +491,48 @@ paths:
                 items:
                   $ref: "#/components/schemas/Matter"
 
+  /matters/search:
+    get:
+      operationId: searchMatters
+      tags: [matters]
+      summary: Search matters by keyword
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Matter"
+
+  /matters/{id}/audit-log:
+    get:
+      operationId: listAuditLog
+      tags: [matters]
+      summary: Get audit log entries for a matter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLogEntry"
+
 components:
   schemas:
     HealthStatus:
@@ -526,6 +568,10 @@ components:
           type: ["string", "null"]
         dateReceived:
           type: ["string", "null"]
+        responseDue:
+          type: ["string", "null"]
+        deadline:
+          type: ["string", "null"]
         createdAt:
           type: string
         updatedAt:
@@ -554,6 +600,10 @@ components:
           type: string
         dateReceived:
           type: string
+        responseDue:
+          type: string
+        deadline:
+          type: string
 
     MatterUpdate:
       type: object
@@ -577,6 +627,10 @@ components:
         summary:
           type: string
         dateReceived:
+          type: string
+        responseDue:
+          type: string
+        deadline:
           type: string
 
     MatterDetail:
@@ -773,6 +827,23 @@ components:
           minLength: 1
         sortOrder:
           type: integer
+
+    AuditLogEntry:
+      type: object
+      required: [id, matterId, action, description, createdAt]
+      properties:
+        id:
+          type: integer
+        matterId:
+          type: integer
+        action:
+          type: string
+        description:
+          type: string
+        changedBy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
 
     DashboardSummary:
       type: object

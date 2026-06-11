@@ -35,6 +35,8 @@ export const ListMattersResponseItem = zod.object({
   "status": zod.enum(['intake', 'analysis', 'review', 'complete']),
   "summary": zod.string().nullish(),
   "dateReceived": zod.string().nullish(),
+  "responseDue": zod.string().nullish(),
+  "deadline": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -56,7 +58,9 @@ export const CreateMatterBody = zod.object({
   "urgency": zod.enum(['low', 'medium', 'high', 'critical']),
   "category": zod.enum(['contract', 'compliance', 'employment', 'intellectual_property', 'dispute', 'regulatory', 'data_privacy', 'corporate', 'general']),
   "summary": zod.string().optional(),
-  "dateReceived": zod.string().optional()
+  "dateReceived": zod.string().optional(),
+  "responseDue": zod.string().optional(),
+  "deadline": zod.string().optional()
 })
 
 
@@ -78,6 +82,8 @@ export const GetMatterResponse = zod.object({
   "status": zod.enum(['intake', 'analysis', 'review', 'complete']),
   "summary": zod.string().nullish(),
   "dateReceived": zod.string().nullish(),
+  "responseDue": zod.string().nullish(),
+  "deadline": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 }),
@@ -139,7 +145,9 @@ export const UpdateMatterBody = zod.object({
   "category": zod.enum(['contract', 'compliance', 'employment', 'intellectual_property', 'dispute', 'regulatory', 'data_privacy', 'corporate', 'general']).optional(),
   "status": zod.enum(['intake', 'analysis', 'review', 'complete']).optional(),
   "summary": zod.string().optional(),
-  "dateReceived": zod.string().optional()
+  "dateReceived": zod.string().optional(),
+  "responseDue": zod.string().optional(),
+  "deadline": zod.string().optional()
 })
 
 export const UpdateMatterResponse = zod.object({
@@ -152,6 +160,8 @@ export const UpdateMatterResponse = zod.object({
   "status": zod.enum(['intake', 'analysis', 'review', 'complete']),
   "summary": zod.string().nullish(),
   "dateReceived": zod.string().nullish(),
+  "responseDue": zod.string().nullish(),
+  "deadline": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -467,9 +477,54 @@ export const GetRecentMattersResponseItem = zod.object({
   "status": zod.enum(['intake', 'analysis', 'review', 'complete']),
   "summary": zod.string().nullish(),
   "dateReceived": zod.string().nullish(),
+  "responseDue": zod.string().nullish(),
+  "deadline": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
 export const GetRecentMattersResponse = zod.array(GetRecentMattersResponseItem)
+
+
+/**
+ * @summary Search matters by keyword
+ */
+export const SearchMattersQueryParams = zod.object({
+  "q": zod.coerce.string()
+})
+
+export const SearchMattersResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "stakeholderName": zod.string(),
+  "stakeholderDepartment": zod.string(),
+  "urgency": zod.enum(['low', 'medium', 'high', 'critical']),
+  "category": zod.enum(['contract', 'compliance', 'employment', 'intellectual_property', 'dispute', 'regulatory', 'data_privacy', 'corporate', 'general']),
+  "status": zod.enum(['intake', 'analysis', 'review', 'complete']),
+  "summary": zod.string().nullish(),
+  "dateReceived": zod.string().nullish(),
+  "responseDue": zod.string().nullish(),
+  "deadline": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const SearchMattersResponse = zod.array(SearchMattersResponseItem)
+
+
+/**
+ * @summary Get audit log entries for a matter
+ */
+export const ListAuditLogParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ListAuditLogResponseItem = zod.object({
+  "id": zod.number(),
+  "matterId": zod.number(),
+  "action": zod.string(),
+  "description": zod.string(),
+  "changedBy": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListAuditLogResponse = zod.array(ListAuditLogResponseItem)
 
 

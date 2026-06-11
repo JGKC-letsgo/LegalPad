@@ -19,4 +19,6 @@ export interface MatterInput {
   category: MatterInputCategory;
   summary?: string;
   dateReceived?: string;
+  responseDue?: string;
+  deadline?: string;
 }

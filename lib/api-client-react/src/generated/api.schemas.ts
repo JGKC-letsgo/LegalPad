@@ -56,6 +56,10 @@ export interface Matter {
   summary?: string | null;
   /** @nullable */
   dateReceived?: string | null;
+  /** @nullable */
+  responseDue?: string | null;
+  /** @nullable */
+  deadline?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -96,6 +100,8 @@ export interface MatterInput {
   category: MatterInputCategory;
   summary?: string;
   dateReceived?: string;
+  responseDue?: string;
+  deadline?: string;
 }
 
 export type MatterUpdateUrgency = typeof MatterUpdateUrgency[keyof typeof MatterUpdateUrgency];
@@ -143,6 +149,8 @@ export interface MatterUpdate {
   status?: MatterUpdateStatus;
   summary?: string;
   dateReceived?: string;
+  responseDue?: string;
+  deadline?: string;
 }
 
 export interface Issue {
@@ -306,6 +314,16 @@ export interface CaveatUpdate {
   sortOrder?: number;
 }
 
+export interface AuditLogEntry {
+  id: number;
+  matterId: number;
+  action: string;
+  description: string;
+  /** @nullable */
+  changedBy?: string | null;
+  createdAt: string;
+}
+
 export type DashboardSummaryByStatusItem = {
   status: string;
   count: number;
@@ -333,5 +351,9 @@ export type ListMattersParams = {
 status?: string;
 urgency?: string;
 category?: string;
+};
+
+export type SearchMattersParams = {
+q: string;
 };
 

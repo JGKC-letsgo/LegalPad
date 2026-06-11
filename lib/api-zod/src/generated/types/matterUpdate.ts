@@ -19,4 +19,6 @@ export interface MatterUpdate {
   status?: MatterUpdateStatus;
   summary?: string;
   dateReceived?: string;
+  responseDue?: string;
+  deadline?: string;
 }

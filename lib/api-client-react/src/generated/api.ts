@@ -22,6 +22,7 @@ import type {
 import type {
   Analysis,
   AnalysisInput,
+  AuditLogEntry,
   Caveat,
   CaveatInput,
   CaveatUpdate,
@@ -37,7 +38,8 @@ import type {
   MatterUpdate,
   Recommendation,
   RecommendationInput,
-  RecommendationUpdate
+  RecommendationUpdate,
+  SearchMattersParams
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -1679,6 +1681,167 @@ export function useGetRecentMatters<TData = Awaited<ReturnType<typeof getRecentM
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetRecentMattersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSearchMattersUrl = (params: SearchMattersParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/matters/search?${stringifiedParams}` : `/api/matters/search`
+}
+
+/**
+ * @summary Search matters by keyword
+ */
+export const searchMatters = async (params: SearchMattersParams, options?: RequestInit): Promise<Matter[]> => {
+
+  return customFetch<Matter[]>(getSearchMattersUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSearchMattersQueryKey = (params?: SearchMattersParams,) => {
+    return [
+    `/api/matters/search`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSearchMattersQueryOptions = <TData = Awaited<ReturnType<typeof searchMatters>>, TError = ErrorType<unknown>>(params: SearchMattersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof searchMatters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSearchMattersQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchMatters>>> = ({ signal }) => searchMatters(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchMatters>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type SearchMattersQueryResult = NonNullable<Awaited<ReturnType<typeof searchMatters>>>
+export type SearchMattersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Search matters by keyword
+ */
+
+export function useSearchMatters<TData = Awaited<ReturnType<typeof searchMatters>>, TError = ErrorType<unknown>>(
+ params: SearchMattersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof searchMatters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getSearchMattersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getListAuditLogUrl = (id: number,) => {
+
+
+
+
+  return `/api/matters/${id}/audit-log`
+}
+
+/**
+ * @summary Get audit log entries for a matter
+ */
+export const listAuditLog = async (id: number, options?: RequestInit): Promise<AuditLogEntry[]> => {
+
+  return customFetch<AuditLogEntry[]>(getListAuditLogUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAuditLogQueryKey = (id: number,) => {
+    return [
+    `/api/matters/${id}/audit-log`
+    ] as const;
+    }
+
+
+export const getListAuditLogQueryOptions = <TData = Awaited<ReturnType<typeof listAuditLog>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAuditLog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAuditLogQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAuditLog>>> = ({ signal }) => listAuditLog(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAuditLog>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAuditLogQueryResult = NonNullable<Awaited<ReturnType<typeof listAuditLog>>>
+export type ListAuditLogQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get audit log entries for a matter
+ */
+
+export function useListAuditLog<TData = Awaited<ReturnType<typeof listAuditLog>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAuditLog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAuditLogQueryOptions(id,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

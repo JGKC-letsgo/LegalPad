@@ -6,6 +6,7 @@ import {
   UpsertAnalysisParams,
   UpsertAnalysisBody,
 } from "@workspace/api-zod";
+import { logAudit } from "../lib/audit";
 
 const router: IRouter = Router();
 
@@ -68,6 +69,8 @@ router.put("/matters/:id/analysis", async (req, res): Promise<void> => {
     }).returning();
     analysis = created;
   }
+
+  await logAudit(params.data.id, "analysis_updated", "Analysis section updated");
 
   res.json({
     ...analysis,

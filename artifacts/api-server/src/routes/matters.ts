@@ -9,6 +9,7 @@ import {
   DeleteMatterParams,
   ListMattersQueryParams,
 } from "@workspace/api-zod";
+import { logAudit } from "../lib/audit";
 
 const router: IRouter = Router();
 
@@ -71,6 +72,8 @@ router.post("/matters", async (req, res): Promise<void> => {
     dateReceived: parsed.data.dateReceived ?? null,
     status: "intake",
   }).returning();
+
+  await logAudit(matter.id, "matter_created", `Matter created: ${matter.title}`);
 
   res.status(201).json({
     ...matter,
@@ -152,6 +155,9 @@ router.patch("/matters/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Matter not found" });
     return;
   }
+
+  const changes = Object.keys(parsed.data).join(", ");
+  await logAudit(matter.id, "matter_updated", `Updated: ${changes}`);
 
   res.json({
     ...matter,

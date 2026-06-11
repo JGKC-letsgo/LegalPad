@@ -12,6 +12,8 @@ export const mattersTable = pgTable("matters", {
   status: text("status").notNull().default("intake"),
   summary: text("summary"),
   dateReceived: text("date_received"),
+  responseDue: text("response_due"),
+  deadline: text("deadline"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -76,3 +78,14 @@ export const caveatsTable = pgTable("caveats", {
 export const insertCaveatSchema = createInsertSchema(caveatsTable).omit({ id: true, createdAt: true });
 export type InsertCaveat = z.infer<typeof insertCaveatSchema>;
 export type Caveat = typeof caveatsTable.$inferSelect;
+
+export const auditLogsTable = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  matterId: integer("matter_id").notNull().references(() => mattersTable.id, { onDelete: "cascade" }),
+  action: text("action").notNull(),
+  description: text("description").notNull(),
+  changedBy: text("changed_by"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type AuditLog = typeof auditLogsTable.$inferSelect;

@@ -21,6 +21,10 @@ export interface Matter {
   summary?: string | null;
   /** @nullable */
   dateReceived?: string | null;
+  /** @nullable */
+  responseDue?: string | null;
+  /** @nullable */
+  deadline?: string | null;
   createdAt: string;
   updatedAt: string;
 }

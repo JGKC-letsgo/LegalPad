@@ -1,0 +1,3 @@
+- [Orval query options require queryKey](orval-query-key.md) — when passing `query: { enabled }` to Orval-generated hooks, `queryKey` is also required by TanStack v5 types; easiest fix is to omit options entirely when id is always defined.
+- [Clerk App.tsx pattern](clerk-apptsx.md) — `ClerkProvider` must be inside `WouterRouter` so `useLocation` works in `routerPush/routerReplace`; `publishableKeyFromHost` import must be at the top of the file, not after `export default`.
+- [esbuild zod/v4 import](esbuild-zod.md) — esbuild cannot resolve `zod/v4` subpath in api-server; always import from `@workspace/api-zod` or use plain `zod` in server routes.
