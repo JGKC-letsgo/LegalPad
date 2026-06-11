@@ -1,13 +1,13 @@
+import React, { Component } from "react";
 import { useEffect, useRef } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ClerkProvider, SignIn, SignUp, useClerk, useAuth } from "@clerk/react";
+import { ClerkProvider, SignIn, SignUp, Show, useClerk } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { shadcn } from "@clerk/themes";
 import NotFound from "@/pages/not-found";
-import Dashboard from "@/pages/dashboard";
 import MattersList from "@/pages/matters/index";
 import NewMatter from "@/pages/matters/new";
 import MatterWorkspace from "@/pages/matters/[id]/workspace";
@@ -24,6 +24,10 @@ const clerkPubKey = publishableKeyFromHost(
 );
 
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
+
+if (!clerkPubKey) {
+  throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY");
+}
 
 const clerkAppearance = {
   theme: shadcn,
@@ -80,6 +84,45 @@ function stripBase(path: string): string {
     : path;
 }
 
+class ErrorBoundary extends Component<
+  { children: React.ReactNode },
+  { hasError: boolean; message: string }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, message: "" };
+  }
+
+  static getDerivedStateFromError(error: unknown) {
+    return {
+      hasError: true,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-background px-4">
+          <div className="max-w-md text-center space-y-4">
+            <h1 className="text-xl font-semibold text-foreground">Something went wrong</h1>
+            <p className="text-sm text-muted-foreground font-mono bg-muted rounded p-3 text-left break-words">
+              {this.state.message}
+            </p>
+            <button
+              className="text-sm text-primary underline"
+              onClick={() => window.location.reload()}
+            >
+              Reload page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
   const qc = useQueryClient();
@@ -116,49 +159,28 @@ function SignUpPage() {
 }
 
 function HomeRedirect() {
-  const { isLoaded, isSignedIn } = useAuth();
-  if (!isLoaded) return null;
-  if (isSignedIn) return <Redirect to="/matters" />;
-  return <LandingPage />;
-}
-
-function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const { isLoaded, isSignedIn } = useAuth();
-  if (!isLoaded) return null;
-  if (isSignedIn) return <Component />;
-  return <Redirect to="/" />;
-}
-
-function AuthGate() {
-  const { isLoaded, isSignedIn } = useAuth();
-  if (!isLoaded) return null;
-  if (isSignedIn) return <AppRoutes />;
-  return <Redirect to="/" />;
-}
-
-function AppRoutes() {
   return (
-    <MainLayout>
-      <Switch>
-        <Route path="/matters" component={MattersList} />
-        <Route path="/matters/new" component={NewMatter} />
-        <Route path="/matters/:id/output">
-          {(params) => <ProtectedRoute component={() => <MatterOutput />} />}
-        </Route>
-        <Route path="/matters/:id" component={MatterWorkspace} />
-        <Route component={NotFound} />
-      </Switch>
-    </MainLayout>
+    <>
+      <Show when="signed-in">
+        <Redirect to="/matters" />
+      </Show>
+      <Show when="signed-out">
+        <LandingPage />
+      </Show>
+    </>
   );
 }
 
-function ClerkLoading() {
-  const { isLoaded } = useAuth();
-  if (isLoaded) return null;
+function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-background">
-      <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-    </div>
+    <>
+      <Show when="signed-in">
+        <MainLayout>{children}</MainLayout>
+      </Show>
+      <Show when="signed-out">
+        <Redirect to="/" />
+      </Show>
+    </>
   );
 }
 
@@ -180,26 +202,37 @@ function ClerkProviderWithRoutes() {
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
     >
       <QueryClientProvider client={queryClient}>
-        <ClerkLoading />
         <ClerkQueryClientCacheInvalidator />
         <Switch>
           <Route path="/" component={HomeRedirect} />
           <Route path="/sign-in/*?" component={SignInPage} />
           <Route path="/sign-up/*?" component={SignUpPage} />
-          <Route path="/{*rest}" component={AuthGate} />
+          <Route path="/matters/new">
+            <ProtectedLayout><NewMatter /></ProtectedLayout>
+          </Route>
+          <Route path="/matters/:id/output">
+            <ProtectedLayout><MatterOutput /></ProtectedLayout>
+          </Route>
+          <Route path="/matters/:id">
+            <ProtectedLayout><MatterWorkspace /></ProtectedLayout>
+          </Route>
+          <Route path="/matters">
+            <ProtectedLayout><MattersList /></ProtectedLayout>
+          </Route>
+          <Route component={NotFound} />
         </Switch>
       </QueryClientProvider>
     </ClerkProvider>
   );
 }
 
-import React from "react";
-
 function App() {
   return (
     <TooltipProvider>
       <WouterRouter base={basePath}>
-        <ClerkProviderWithRoutes />
+        <ErrorBoundary>
+          <ClerkProviderWithRoutes />
+        </ErrorBoundary>
       </WouterRouter>
       <Toaster />
     </TooltipProvider>
